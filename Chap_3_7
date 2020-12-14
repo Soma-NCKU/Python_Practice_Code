@@ -1,0 +1,104 @@
+# Kernel Methods for linearly inseparable data 
+
+# ============================================================================
+# Visualization and plot the boundary decision (Convergence Plot)
+
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+def plot_decision_regions(X, y, classifier, test_idx = None, resolution = 0.02):
+    
+    # setup marker generator and color map
+    markers = ('s', 'x', 'o', '^', 'v')
+    colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
+    cmap = ListedColormap(colors[:len(np.unique(y))])
+    
+    # plot the decision surface
+    
+    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    
+## determine the minimum and maximum values for the two features 
+## and use those features vectors to create a pair of grid arrays xx1 and xx2
+
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+## Since we trained preceptron classifier on two feature dimensions, we 
+## need to flatten the grid arrays and create a matrix that has the same 
+## number of columns as the Iris training subset so that we can use the 
+## predict method to predict the class labels Z of the corresponding grid points.
+
+    Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+    Z = Z.reshape(xx1.shape)
+    plt.contourf(xx1, xx2, Z, alpha=0.3, cmap=cmap)
+    plt.xlim(xx1.min(), xx1.max())
+    plt.ylim(xx2.min(), xx2.max())
+    
+    # plot class samples
+    for idx, cl in enumerate(np.unique(y)):
+        plt.scatter(x=X[y == cl, 0],
+                    y=X[y == cl, 1],
+                    alpha=0.8,
+                    c=colors[idx],
+                    marker=markers[idx],
+                    label=cl,
+                    edgecolor='black')
+        
+    # highlight test samples
+    if test_idx:
+        # plot all samples
+        X_test = X[test_idx, :]
+        plt.scatter(X_test[:, 0], X_test[:, 1], c = '', edgecolor = 'black', alpha = 1.0,
+                    linewidth = 1, marker = 'o', s = 100, label = 'test set')
+
+import numpy as np
+
+np.random.seed(1)
+
+X_xor = np.random.randn(200, 2)
+y_xor = np.logical_xor(X_xor[:, 0] > 0, X_xor[:, 1] > 0)
+y_xor = np.where(y_xor, 1, -1)
+
+plt.scatter(X_xor[y_xor == 1, 0], X_xor[y_xor == 1, 1], c = 'b', marker = 'x', label = '1')
+plt.scatter(X_xor[y_xor == -1, 0], X_xor[y_xor == -1, 1], c = 'r', marker = 's', label = '-1')
+
+plt.xlim([-3, 3])
+plt.ylim([-3, 3])
+plt.legend(loc = 'best')
+plt.show()
+
+# PART - 1 :
+# MODEL 
+from sklearn.svm import SVC
+svm = SVC(kernel = 'rbf', random_state = 1, gamma = 0.1, C = 10.0)   # verify the gamma value - observe the change
+svm.fit(X_xor, y_xor)
+plot_decision_regions(X_xor, y_xor, classifier = svm)
+plt.legend(loc = 'upper left')
+plt.show()
+
+# PART - 2 : Scalared dataset -- not much difference observed in case of xor dataset
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X_xor, y_xor, 
+                                                    test_size = 0.3, 
+                                                    random_state = 1)  
+
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+sc.fit(X_train)
+sc.fit(X_test)
+X_train_std = sc.transform(X_train)
+X_test_std = sc.transform(X_test)
+
+X_combined_std = np.vstack((X_train_std, X_test_std))
+y_combined = np.hstack((y_train, y_test))
+
+plot_decision_regions(X = X_combined_std, y = y_combined, classifier = svm, test_idx = range(105, 150))
+plt.xlabel('petal length [standardized]')
+plt.ylabel('petal width [standardized]')
+plt.legend(loc = 'upper left')
+plt.show()
+
+### From the above, it can be well understood that the kernel SVM separates the **XOR** data relatively well.
+
+####  Let's understand the gamma parameter, which we set as 0.1, can be considered as an cut-off parameter for the guassian sphere. If we increase gamma - ? check what happens --?/
