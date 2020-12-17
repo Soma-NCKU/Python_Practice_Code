@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Dec 17 16:19:07 2020
+
+Reference Textbook : Python Machine Learning 
+                Sebastian & vahid
+       
+"""
+## Handling Categorical data - Nominal and ordinal features
+
+import pandas as pd
+
+df = pd.DataFrame([
+    ['green', 'M', 10.1, 'class1'],
+    ['red', 'L', 13.5, 'class2'],
+    ['blue', 'XL', 15.3, 'class1']])
+
+df.columns = ['color', 'size', 'price', 'classlabel']
+print(df)
+# color - nominal feature; size - ordinal feature; price - numerical feature; classlabel - supervised learning parameter 
+
+
+## Important step - Mapping ordinal features
+
+# To make sure the algorithmm interprets the ordinal features correctly, we need to convert categorical strings into integers.
+# One way- ".map function"
+size_mapping = {'XL': 3, 'L': 2, 'M': 1}
+df['size'] = df['size'].map(size_mapping)
+print(df)
+
+# reverse mapping using pandas
+inv_size_mapping = {v: k for k, v in size_mapping.items()}   # creating dictionary
+df['size'] = df['size'].map(inv_size_mapping)
+
+
+## Encoding class labels:
+import numpy as np
+
+class_mapping = {label:idx for idx, label in enumerate(np.unique(df['classlabel']))}
+
+df['classlabel'] = df['classlabel'].map(class_mapping)
+print(df)
+
+# reverse the order
+inv_class_mapping = {v: k for k, v in class_mapping.items()}
+df['classlabel'] = df['classlabel'].map(inv_class_mapping)
+print(df)
+
+
+## Alternative way , LabelEncoder class directly 
+
+from sklearn.preprocessing import LabelEncoder 
+
+class_le = LabelEncoder()
+df['classlabel'] = class_le.fit_transform(df['classlabel'].values)
+print(df)
+
+df['classlabel'] = class_le.inverse_transform(df['classlabel'])
+
+
