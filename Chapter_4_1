@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Dec 17 15:07:40 2020
+
+Reference Textbook : Python Machine Learning 
+                Sebastian & vahid
+                
+"""
+# Data Preprocessing
+
+import numpy as np
+import pandas as pd
+from io import StringIO
+
+csv_data = \
+    ''' A, B, C, D
+    1.0, 2.0, 3.0, 4.0   
+    5.0, 6.0,, 8.0
+    10.0, 11.0, 12.0,'''
+    
+df = pd.read_csv(StringIO(csv_data))
+
+# note: StringIO function is used for illustration purpose. It allows us to read the string assigned 
+# to csv_data into a panda datafframe as if it was a regular CSV file on hard drive.
+
+# Important note - For large dataset, it can be tedious to look for missing values manually.
+# So we use isnull method to return a DataFrame . Using the sum method, we can return the number of
+# missing values per column as follows:
+
+df.isnull().sum()
+
+# We can access the underlying NUmPy array of the DataFrame via the values attriute before we feed it into 
+# a scikit-learn API:
+
+df.values
+
+# ========================================================================================================
+
+# Eliminating the samples or features with missing values - .drop (or) .dropna
+
+df.dropna(axis = 0)
+
+df.dropna(axis = 1)
+
+# dropna method supports several additional parameters 
+
+df.dropna(how = 'all') # only drop rows where all cols are Nan
+
+df.dropna(thresh = 4)  # drop row that have less than 4 real values
+
+
+# =======================================================================================================
+
+# Imputing missing values 
+
+# Oftaain droping or removal of entire features is not feasible, as we may loss infromation.
+# Most commoon interpolation techniques - mean imputation where we replace the missing values with 
+# the meann value of entire feature column
+
+# from sklearn.preprocessing import Imputer  # old version
+from sklearn.impute import SimpleImputer
+
+imr = SimpleImputer(missing_values = np.nan, strategy = 'mean') # another strategy = medium or most_frequent
+imr = imr.fit(df.values)
+imputed_data = imr.transform(df.values)
+imputed_data
+
+# check the mean value (just for verification)
+df.mean(axis = 0)
