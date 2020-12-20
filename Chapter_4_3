@@ -1,0 +1,68 @@
+# Wine Dataset
+import numpy as np
+import pandas as pd
+
+df_wine = pd.read_csv('https://archive.ics.uci.edu/ml/''machine-learning-databases/wine/wine.data', header = None)
+
+df_wine.columns = ['ClassLabel', 'Alcohol', 'MalicAcid', 'Ash', 'AlcalinityOfAsh', 'Magnesium', 'TotalPhenols', 'Flavanoids', 
+                  'NonflavanoidsPhenols', 'Proanthocyanins', 'ColorIntensity', 'Hue', 'OD280/OD315OfDilutedWines', 'Proline']
+
+
+print(df_wine.head(5))
+print(df_wine.shape)
+
+print('ClassLabel', np.unique(df_wine['ClassLabel']))
+
+# Randomly partition the dataset
+
+from sklearn.model_selection import train_test_split
+
+#X, y = df_wine.iloc[:,1:], df_wine.iloc[:,0] # not in array form
+X, y = df_wine.iloc[:,1:].values, df_wine.iloc[:,0].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 0, stratify = y)
+
+X.shape, y.shape, X_train.shape, y_train.shape, X_test.shape, y_test.shape
+
+# Bringing the features onto the same scale
+
+# feature scaling is a crucial step. 
+
+# Note: Among few ML algorithm, Decision tree and Random forest are scale invarient.
+
+# An example , Squared error funstion on Adaline, intuitively, we say that algorithm is mostly busy 
+# optimizing the weights according to the large error in the second feature. Also, in KNN with euclidean
+# distance measure; the computed distance between samples will be dominated by the second feature axis.
+
+# two common approaches - Normalization and Standardization
+
+# Although Normalization via min-max scaling is commonly used technique that is useful when we need values in 
+# bounded interval; Standardization can be more practical for many ML algorithms, espicalling for optimization
+# algorithm such as GD. The reason is that many algo such as logistic regression, SVM, initialize weights to 0 
+# or small random values close to zero. 
+
+# Using standardization, we center the feature columns at mean 0 with standard deviation 1 so that the features 
+# columns takes the form of a normal distribution, which make its easier to learn weights. Standarization maintains useful
+# infromation about the outlier and makes the algorithm less sensitive to them in contrast to min-max scaling which scales
+# the data to a limited range.
+
+ex = np.array([0, 1,2, 3, 4, 5])
+
+print('standardized:', (ex - ex.mean()) / ex.std())
+print('normalized:', (ex - ex.min()) / (ex.max() - ex.min()))
+
+# Normalization
+from sklearn.preprocessing import MinMaxScaler 
+mms = MinMaxScaler()
+X_train_norm = mms.fit_transform(X_train)
+X_test_norm = mms.fit_transform(X_test)
+
+# Standardization
+from sklearn.preprocessing import StandardScaler
+stdsc = StandardScaler()
+X_train_std = stdsc.fit_transform(X_train)
+X_test_std = stdsc.fit_transform(X_test)
+
+print(X_train_norm)
+print('-'* 80)
+print(X_train_std)
+
