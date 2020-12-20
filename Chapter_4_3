@@ -66,3 +66,150 @@ print(X_train_norm)
 print('-'* 80)
 print(X_train_std)
 
+# ------------------------------------------------------------------------------------------------------------------
+
+# Train a model 
+from sklearn.linear_model import LogisticRegression
+lr = LogisticRegression(C = 0.5, random_state = 1)
+lr.fit(X_train_std, y_train)
+
+y_pred = lr.predict(X_test_std)
+print('Misclassified samples: %d' %(y_test != y_pred).sum())
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %f' % accuracy_score(y_test, y_pred))
+
+# Alternatively, each classifier in scikit-learn has a score method, as shown below
+print('Accuracy: %f' % lr.score(X_test_std, y_test))
+
+
+from sklearn.svm import SVC
+svm = SVC(kernel = 'linear', C = 0.5, random_state = 1)
+svm.fit(X_train_std, y_train)
+
+y_pred = svm.predict(X_test_std)
+print('Misclassified samples: %d' %(y_test != y_pred).sum())
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %f' % accuracy_score(y_test, y_pred))
+
+# Alternatively, each classifier in scikit-learn has a score method, as shown below
+print('Accuracy: %f' % svm.score(X_test_std, y_test))
+
+# Train a model 
+from sklearn.svm import SVC
+svm = SVC(kernel = 'rbf', C = 0.5, gamma = 0.1, random_state = 1)
+svm.fit(X_train_std, y_train)
+y_pred = svm.predict(X_test_std)
+print('Misclassified samples: %d' %(y_test != y_pred).sum())
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %0.2f' % accuracy_score(y_test, y_pred))
+
+# Alternatively, each classifier in scikit-learn has a score method, as shown below
+print('Accuracy: %0.2f' % svm.score(X_test_std, y_test))
+
+from sklearn.ensemble import RandomForestClassifier
+
+forest = RandomForestClassifier(criterion = 'gini', n_estimators = 25, random_state = 1, n_jobs = 2)
+forest.fit(X_train, y_train)
+
+y_pred = forest.predict(X_test_std)
+print('Misclassified samples: %d' %(y_test != y_pred).sum())
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %f' % accuracy_score(y_test, y_pred))
+
+# Alternatively, each classifier in scikit-learn has a score method, as shown below
+print('Accuracy: %f' % forest.score(X_test_std, y_test))
+
+from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier(criterion = 'gini', max_depth = 4, random_state = 1)
+dtree = tree.fit(X_train, y_train)
+
+y_pred = tree.predict(X_test_std)
+print('Misclassified samples: %d' %(y_test != y_pred).sum())
+
+from sklearn.metrics import accuracy_score
+print('Accuracy: %f' % accuracy_score(y_test, y_pred))
+
+# Alternatively, each classifier in scikit-learn has a score method, as shown below
+print('Accuracy: %f' % tree.score(X_test_std, y_test))
+
+# ------------------------------------------------------------------------------------------------
+
+## Selecting meaningful features -- Using REGULARIZATION
+
+# Use L1 or L2 
+
+# We notice that model performs much better on training dataset than on the test dataset, 
+# this observation is a strong indicator of OVERFITTING.
+
+# It indicates the model fits too closely wrt particular observation in training dataset, 
+# but does not generalize well to new data, therefore it has high variance. -- (model is said to be
+# too complex)
+
+# Common solution: 1. Collect more training data; 2. Introduce penalty (via regularization)
+#                  3. Choose simpler model with fewer parameter 4. Reduce dimensionality of data
+
+
+# L2 and L1 both reduces the complexity of a model. 
+
+# Note: In contrast L2 regularization, L1 regularization usually yields spare feature vectors; most feature
+# weights will be zero. Sparity is useful if we have high - dimensional dataset with many features that are
+# irrelevant. In sense L1, can be understood as a technique for feature selection.
+
+
+# Let us consider the model of LOGISTRIC REGRESSION
+from sklearn.linear_model import LogisticRegression
+lr = LogisticRegression(penalty = 'l1', C = 0.6, solver='liblinear')  # choosing lower values of C ( = 1 / alpha)
+lr.fit(X_train_std, y_train)
+
+print('Training accuracy: ', lr.score(X_train_std, y_train))
+
+print('Test accuracy: ', lr.score(X_test_std, y_test))
+
+lr.intercept_
+lr.coef_
+
+# -----------------------------------------------------------------------------------------------------------
+# Visualization
+
+import matplotlib.pyplot as plt
+
+fig = plt.figure()
+ax = plt.subplot(111)
+
+colors = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'pink', 'lightgreen',
+         'gray', 'lightblue', 'gray', 'indigo', 'orange']
+
+weights, params = [], []
+
+for c in np.arange(-4, 6):
+    lr = LogisticRegression(penalty = 'l1', C = 10.0**c, random_state = 0, solver='liblinear')
+    lr.fit(X_train_std, y_train)
+    weights.append(lr.coef_[1])
+    params.append(10.0**c)
+    
+weights = np.array(weights)
+
+for column, color in zip(range(weights.shape[1]), colors):
+    plt.plot(params, weights[:, column],
+            label = df_wine.columns[column + 1],
+            color = color)
+    
+plt.axhline(0, color = 'black', linestyle = "--", linewidth = 3)
+plt.xlim([10**(-5), 10**(5)])
+plt.ylabel('weight coefficient')
+plt.xlabel('C')
+plt.xscale('log')
+plt.legend(loc = 'upper left')
+plt.legend(loc = 'upper center', bbox_to_anchor = (1.38, 1.03),
+          ncol = 1, fancybox = True)
+plt.show()
+
+# Plot provides an insights into the behavior of L1 regularization. 
+# All features weights will be zero if we penalize the model with strong regularization parameters(C<0.1);
+# C is the inverse of regularizaation parameter.
+
