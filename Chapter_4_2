@@ -57,4 +57,41 @@ print(df)
 
 df['classlabel'] = class_le.inverse_transform(df['classlabel'])
 
+#class_le.inverse_transform(df['ClassLabel'])
+
+X = df[['Color', 'Size', 'Price']].values
+X[:, 0] = class_le.fit_transform(X[:, 0])
+print(X)
+
+"""OLder version (scikit-learn 0.22.1)
+
+frome sklearn.preprocessing import OneHotEncoder
+
+ohe = OneHotEncoder(categorical_features = [0])
+ohe.fit_transform(X).toarray()
+
+output looks like:
+
+array([[0.0, 1.0, 0.0, 'M', 10.1],
+       [0.0, 0.0, 1.0, 'L', 13.5],
+       [1.0, 0.0, 0.0, 'XL', 15.3]], dtype=object)
+
+"""
+
+# New Version
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+
+ohe = OneHotEncoder()
+ct = ColumnTransformer([('Color',ohe, [0])], remainder = 'passthrough')
+X = ct.fit_transform(X)
+
+## More Convenient method - create dummy features using get_dummies method from pandas.
+
+pd.get_dummies(df[['Price','Size','Color']])
+
+# how to drop features -- if we consider it not very important
+X = df[['Price', 'Size', 'Color']]
+X1 = pd.get_dummies(X, drop_first = True)
+
 
